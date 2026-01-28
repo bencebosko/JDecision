@@ -4,7 +4,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 
@@ -37,12 +36,12 @@ public class DecisionTree {
      where C is the sum of Classes of all Features
      */
     public void buildTree(List<Record> records) {
-        nodeFactory = new DecisionTreeNodeFactory(SplitMode.MIN_ENTROPY);
-        doBuildTree(records);
+        buildTree(records, SplitMode.MIN_ENTROPY);
     }
 
     public void buildTree(List<Record> records, SplitMode splitMode) {
         nodeFactory = new DecisionTreeNodeFactory(splitMode);
+        root = null;
         doBuildTree(records);
     }
 
@@ -51,19 +50,20 @@ public class DecisionTree {
     }
 
     private void doBuildTree(List<Record> records) {
-        root = nodeFactory.getRootNode(records, features, targetFeature);
+        final var root = nodeFactory.getRootNode(records, features, targetFeature);
         final Queue<DecisionTreeNode> nodesToTraverse = new ArrayDeque<>();
         nodesToTraverse.add(root);
         while (!nodesToTraverse.isEmpty()) {
             final var currentNode = nodesToTraverse.remove();
-            final Map<FeatureClass<?>, List<Record>> classification = currentNode.split();
+            final var classification = currentNode.split();
             final var remainingChildFeatures = currentNode.getRemainingFeatures();
             final List<DecisionTreeNode> children = new ArrayList<>();
             classification.forEach((featureClass, recordsOfClass) -> children.add(nodeFactory.getChildNode(recordsOfClass, remainingChildFeatures, targetFeature, featureClass)));
-            currentNode.setChildren(children);
             if (!currentNode.hasLeafChildren()) {
                 nodesToTraverse.addAll(children);
             }
+            currentNode.setChildren(children);
         }
+        this.root = root;
     }
 }

@@ -15,32 +15,23 @@ abstract class DecisionTreeNode {
     protected final List<Record> records;
     @Getter(AccessLevel.PACKAGE)
     protected final List<Feature<Object>> remainingFeatures;
-    private final Feature<Object> targetFeature;
+    protected final Feature<Object> targetFeature;
     /* Set after splitting the parent. Null for the root node. */
     private FeatureClass<?> featureClass;
     /* Set after splitting the node. Null for leaf nodes. */
     @Getter(AccessLevel.PACKAGE)
-    protected Feature<?> splittingFeature;
+    protected Feature<Object> splittingFeature;
     /* Set after splitting the node. Null for leaf nodes. */
     private List<DecisionTreeNode> children;
 
-    DecisionTreeNode(List<Record> records, List<Feature<Object>> remainingFeatures, Feature<Object> targetFeature, FeatureClass<?> featureClass) {
+    protected DecisionTreeNode(List<Record> records, List<Feature<Object>> remainingFeatures, Feature<Object> targetFeature, FeatureClass<?> featureClass) {
         this.records = Collections.unmodifiableList(records);
-        this.remainingFeatures = new ArrayList<>(remainingFeatures);
+        this.remainingFeatures = remainingFeatures;
         this.targetFeature = targetFeature;
         this.featureClass = featureClass;
     }
 
-    Map<FeatureClass<?>, List<Record>> split() {
-        if (records.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        if (remainingFeatures.isEmpty()) {
-            splittingFeature = targetFeature;
-            return createClassification(targetFeature, records);
-        }
-        return doSplit();
-    }
+    protected abstract Map<FeatureClass<?>, List<Record>> split();
 
     boolean hasLeafChildren() {
         return Objects.equals(splittingFeature, targetFeature);
@@ -49,8 +40,6 @@ abstract class DecisionTreeNode {
     void setChildren(List<DecisionTreeNode> children) {
         this.children = Collections.unmodifiableList(children);
     }
-
-    protected abstract Map<FeatureClass<?>, List<Record>> doSplit();
 
     /*
      Classifies a list of records.
