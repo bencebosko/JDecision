@@ -4,29 +4,29 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 class DecisionTreeNodeMinEntropy extends DecisionTreeNode {
 
-    DecisionTreeNodeMinEntropy(List<Record> records, List<Feature<Object>> remainingFeatures, Feature<Object> targetFeature) {
+    DecisionTreeNodeMinEntropy(List<Record> records, List<Feature<Object>> remainingFeatures, TargetFeature<Object> targetFeature) {
         this(records, remainingFeatures, targetFeature, null);
     }
 
-    DecisionTreeNodeMinEntropy(List<Record> records, List<Feature<Object>> remainingFeatures, Feature<Object> targetFeature, FeatureClass<?> featureClass) {
+    DecisionTreeNodeMinEntropy(List<Record> records, List<Feature<Object>> remainingFeatures, TargetFeature<Object> targetFeature, FeatureClass<?> featureClass) {
         super(records, remainingFeatures, targetFeature, featureClass);
     }
 
     /* Finds min entropy split at specific node of the tree. */
     @Override
-    protected Map<FeatureClass<?>, List<Record>> split() {
+    protected Optional<Map<FeatureClass<?>, List<Record>>> split() {
         if (remainingFeatures.isEmpty()) {
-            splittingFeature = targetFeature;
-            return createClassification(splittingFeature, records);
+            return Optional.empty();
         } else {
             Map<FeatureClass<?>, List<Record>> optimalClassification = Collections.emptyMap();
             var minEntropy = Double.MAX_VALUE;
             for (Feature<Object> feature : remainingFeatures) {
                 final var classification = createClassification(feature, records);
-                final var entropy = getEntropy(classification);
+                final var entropy = getAverageEntropy(classification);
                 if (entropy < minEntropy) {
                     splittingFeature = feature;
                     optimalClassification = classification;
@@ -36,16 +36,21 @@ class DecisionTreeNodeMinEntropy extends DecisionTreeNode {
             if (Objects.nonNull(splittingFeature)) {
                 remainingFeatures.remove(splittingFeature);
             }
-            return optimalClassification;
+            return Optional.of(optimalClassification);
         }
     }
 
-    private double getEntropy(Map<FeatureClass<?>, List<Record>> classification) {
+    private double getAverageEntropy(Map<FeatureClass<?>, List<Record>> classification) {
+        final var classCount = classification.size();
         var entropy = 0.0;
-        for (Map.Entry<FeatureClass<?>, List<Record>> entry : classification.entrySet()) {
-            var p = entry.getKey().getProbability();
-            entropy += p * (Math.log(p) / Math.log(2));
+        for (FeatureClass<?> featureClass : classification.keySet()) {
+            var entropyOfClass = 0.0;
+            for (FeatureClass<?> targetClass : featureClass.getTargetClasses().keySet()) {
+                var p = targetClass.getProbability();
+                entropyOfClass += p * (Math.log(p) / Math.log(2));
+            }
+            entropy += entropyOfClass;
         }
-        return -1 * entropy;
+        return (-1 * entropy) / classCount;
     }
 }

@@ -56,13 +56,13 @@ public class DecisionTree {
         while (!nodesToTraverse.isEmpty()) {
             final var currentNode = nodesToTraverse.remove();
             final var classification = currentNode.split();
-            final var remainingChildFeatures = currentNode.getRemainingFeatures();
-            final List<DecisionTreeNode> children = new ArrayList<>();
-            classification.forEach((featureClass, recordsOfClass) -> children.add(nodeFactory.getChildNode(recordsOfClass, remainingChildFeatures, targetFeature, featureClass)));
-            if (!currentNode.hasLeafChildren()) {
+            classification.ifPresent(classes -> {
+                final var remainingChildFeatures = currentNode.getRemainingFeatures();
+                final List<DecisionTreeNode> children = new ArrayList<>();
+                classes.forEach((featureClass, recordsOfClass) -> children.add(nodeFactory.getChildNode(recordsOfClass, remainingChildFeatures, targetFeature, featureClass)));
+                currentNode.setChildren(children);
                 nodesToTraverse.addAll(children);
-            }
-            currentNode.setChildren(children);
+            });
         }
         this.root = root;
     }
