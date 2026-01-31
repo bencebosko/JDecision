@@ -7,19 +7,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/* Classifies a record by a feature with the given mapping rule. If a Record cannot be obviously classified exception is thrown. */
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 abstract class Classifier<T> {
 
-    protected final Feature<T> feature;
     private final Map<T, FeatureClass<T>> classes = new HashMap<>();
 
-    protected abstract FeatureClass<T> valueMapper(T value);
+    protected abstract FeatureClass<T> valueMapper(T value, Feature<T> feature);
 
-    /* Classifies a single value of the feature. */
-    FeatureClass<T> classify(T value) {
-        final var featureClass = classes.computeIfAbsent(value, value_ -> valueMapper(value));
+    FeatureClass<T> classify(Record record, Feature<T> feature) {
+        final var value = (T) record.getValue(feature);
+        final var featureClass = classes.computeIfAbsent(value, value_ -> valueMapper(value, feature));
         if (Objects.isNull(featureClass)) {
-            throw new DecisionTreeException("No class found for feature '" + feature.getName() + "' with value: " + value);
+            throw new DecisionTreeException("Class not found for feature " + feature.getName() + " with value: " + value);
         }
         return featureClass;
     }

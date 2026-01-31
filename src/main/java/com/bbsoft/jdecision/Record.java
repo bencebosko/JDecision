@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-/* A row of feature-value pairs. Feature represents a splitting column in the dataset. */
+/* A row of feature-value pairs. If a record has missing feature exception is thrown. */
 public class Record {
 
     private final Map<Feature<?>, Object> data = new HashMap<>();
