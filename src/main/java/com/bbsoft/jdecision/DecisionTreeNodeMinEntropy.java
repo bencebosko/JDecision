@@ -1,5 +1,7 @@
 package com.bbsoft.jdecision;
 
+import lombok.Builder;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -8,12 +10,13 @@ import java.util.Optional;
 
 class DecisionTreeNodeMinEntropy extends DecisionTreeNode {
 
-    DecisionTreeNodeMinEntropy(List<Record> records, List<Feature<Object>> remainingFeatures, TargetFeature<Object> targetFeature) {
-        this(records, remainingFeatures, targetFeature, null);
-    }
-
-    DecisionTreeNodeMinEntropy(List<Record> records, List<Feature<Object>> remainingFeatures, TargetFeature<Object> targetFeature, FeatureClass<?> featureClass) {
-        super(records, remainingFeatures, targetFeature, featureClass);
+    @Builder
+    DecisionTreeNodeMinEntropy(List<Record> records,
+                               List<Feature<Object>> remainingFeatures,
+                               TargetFeature<Object> targetFeature,
+                               boolean isRegression,
+                               FeatureClass<?> featureClass) {
+        super(records, remainingFeatures, targetFeature, isRegression, featureClass);
     }
 
     /* Finds min entropy split at specific node of the tree. */

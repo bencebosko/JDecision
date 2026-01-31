@@ -1,17 +1,20 @@
 package com.bbsoft.jdecision;
 
+import lombok.Builder;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 class DecisionTreeNodeManual extends DecisionTreeNode {
 
-    DecisionTreeNodeManual(List<Record> records, List<Feature<Object>> remainingFeatures, TargetFeature<Object> targetFeature) {
-        this(records, remainingFeatures, targetFeature, null);
-    }
-
-    DecisionTreeNodeManual(List<Record> records, List<Feature<Object>> remainingFeatures, TargetFeature<Object> targetFeature, FeatureClass<?> featureClass) {
-        super(records, remainingFeatures, targetFeature, featureClass);
+    @Builder
+    DecisionTreeNodeManual(List<Record> records,
+                           List<Feature<Object>> remainingFeatures,
+                           TargetFeature<Object> targetFeature,
+                           boolean isRegression,
+                           FeatureClass<?> featureClass) {
+        super(records, remainingFeatures, targetFeature, isRegression, featureClass);
     }
 
     /* Splits records with the given features one by one in sequential order. */

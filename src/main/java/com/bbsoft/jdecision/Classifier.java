@@ -15,6 +15,7 @@ abstract class Classifier<T> {
 
     protected abstract FeatureClass<T> valueMapper(T value, Feature<T> feature);
 
+    @SuppressWarnings("unchecked")
     FeatureClass<T> classify(Record record, Feature<T> feature) {
         final var value = (T) record.getValue(feature);
         final var featureClass = classes.computeIfAbsent(value, value_ -> valueMapper(value, feature));

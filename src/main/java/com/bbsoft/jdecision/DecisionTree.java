@@ -10,6 +10,7 @@ import java.util.Queue;
 public class DecisionTree {
 
     public static final int MAX_RECORDS = Integer.MAX_VALUE;
+    public static final DecisionMode DEFAULT_DECISION_MODE = DecisionMode.REGRESSION;
 
     private final List<Feature<Object>> features;
     private final TargetFeature<Object> targetFeature;
@@ -36,10 +37,10 @@ public class DecisionTree {
      where C is the sum of Classes of all Features
      */
     public void buildTree(List<Record> records) {
-        buildTree(records, SplitMode.MIN_ENTROPY);
+        buildTree(records, DEFAULT_DECISION_MODE);
     }
 
-    public void buildTree(List<Record> records, SplitMode splitMode) {
+    public void buildTree(List<Record> records, DecisionMode splitMode) {
         nodeFactory = new DecisionTreeNodeFactory(splitMode);
         root = null;
         doBuildTree(records);

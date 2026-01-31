@@ -9,20 +9,49 @@ import java.util.List;
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 class DecisionTreeNodeFactory {
 
-    private final SplitMode splitMode;
+    private final DecisionMode decisionMode;
 
     DecisionTreeNode getRootNode(List<Record> records, List<Feature<Object>> features, TargetFeature<Object> targetFeature) {
-        final var featuresCopy = new ArrayList<>(features);
-        if (splitMode == SplitMode.MANUAL) {
-            return new DecisionTreeNodeManual(records, featuresCopy, targetFeature);
+        switch (decisionMode) {
+            case REGRESSION:
+                return null;
+            case MANUAL_CLASSIFICATION:
+                return DecisionTreeNodeManual.builder()
+                    .records(records)
+                    .remainingFeatures(new ArrayList<>(features))
+                    .targetFeature(targetFeature)
+                    .isRegression(false)
+                    .build();
+            default:
+                return DecisionTreeNodeMinEntropy.builder()
+                    .records(records)
+                    .remainingFeatures(new ArrayList<>(features))
+                    .targetFeature(targetFeature)
+                    .isRegression(false)
+                    .build();
         }
-        return new DecisionTreeNodeMinEntropy(records, featuresCopy, targetFeature);
     }
 
     DecisionTreeNode getChildNode(List<Record> records, List<Feature<Object>> remainingFeatures, TargetFeature<Object> targetFeature, FeatureClass<?> featureClass) {
-        if (splitMode == SplitMode.MANUAL) {
-            return new DecisionTreeNodeManual(records, remainingFeatures, targetFeature, featureClass);
+        switch (decisionMode) {
+            case REGRESSION:
+                return null;
+            case MANUAL_CLASSIFICATION:
+                return DecisionTreeNodeManual.builder()
+                    .records(records)
+                    .remainingFeatures(remainingFeatures)
+                    .targetFeature(targetFeature)
+                    .isRegression(false)
+                    .featureClass(featureClass)
+                    .build();
+            default:
+                return DecisionTreeNodeMinEntropy.builder()
+                    .records(records)
+                    .remainingFeatures(remainingFeatures)
+                    .targetFeature(targetFeature)
+                    .isRegression(false)
+                    .featureClass(featureClass)
+                    .build();
         }
-        return new DecisionTreeNodeMinEntropy(records, remainingFeatures, targetFeature, featureClass);
     }
 }
