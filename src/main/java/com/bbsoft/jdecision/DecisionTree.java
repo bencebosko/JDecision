@@ -20,7 +20,7 @@ public class DecisionTree {
 
     public DecisionTree(List<Feature<Object>> features, TargetFeature<Object> targetFeature) {
         if (Objects.isNull(targetFeature)) {
-            throw new DecisionTreeException("Target feature cannot be null.");
+            throw DecisionTreeException.nullTargetFeature();
         }
         this.features = Collections.unmodifiableList(features);
         this.targetFeature = targetFeature;

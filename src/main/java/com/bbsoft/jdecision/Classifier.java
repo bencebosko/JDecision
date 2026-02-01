@@ -20,7 +20,7 @@ abstract class Classifier<T> {
         final var value = (T) record.getValue(feature);
         final var featureClass = classes.computeIfAbsent(value, value_ -> valueMapper(value, feature));
         if (Objects.isNull(featureClass)) {
-            throw new DecisionTreeException("Class not found for feature " + feature.getName() + " with value: " + value);
+            throw DecisionTreeException.classNotFoundForFeature(feature, value);
         }
         return featureClass;
     }
