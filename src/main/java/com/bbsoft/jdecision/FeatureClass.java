@@ -4,12 +4,11 @@ import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.Map;
 
-/* Stores the values which belongs to a specific class of the Feature. */
+/* Represents a class of a feature classification. Stores data of the classified records. */
 @RequiredArgsConstructor
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -21,16 +20,33 @@ public class FeatureClass<T> {
     private final T exactValue;
     @EqualsAndHashCode.Include
     private final Interval<T> interval;
-    @Getter(AccessLevel.PACKAGE)
-    private final Map<FeatureClass<?>, FeatureClass<?>> targetClasses = new HashMap<>();
-    @Getter(AccessLevel.PACKAGE)
     private final RegressionAggregate regressionAggregate = new RegressionAggregate();
-    @Setter(AccessLevel.PACKAGE)
+    @Getter(AccessLevel.PACKAGE)
+    private final Map<FeatureClass<?>, FeatureClass<?>> targetClassification = new HashMap<>();
     private int count = 0;
-    @Setter(AccessLevel.PACKAGE)
     private double probability = 0.0;
 
-    FeatureClass<?> computeTargetClass(FeatureClass<?> targetClass) {
-        return targetClasses.computeIfAbsent(targetClass, cls -> cls);
+    void addRecord(Record record, int recordCount, TargetFeature<Object> targetFeature, boolean isRegression) {
+        count = count + 1;
+        setProbability(recordCount);
+        if (isRegression) {
+            regressionAggregate.add(getValueForRegression(record, targetFeature));
+        } else {
+            final var targetClass = targetClassification.computeIfAbsent(targetFeature.getClassifier().classify(record, targetFeature), cls -> cls);
+            targetClass.count = targetClass.count + 1;
+            targetClass.setProbability(recordCount);
+        }
+    }
+
+    private void setProbability(int totalCount) {
+        probability = (double) count / totalCount;
+    }
+
+    private double getValueForRegression(Record record, TargetFeature<?> targetFeature) {
+        var value = record.getValue(targetFeature);
+        if (value instanceof Double) {
+            return (double) value;
+        }
+        throw DecisionTreeException.invalidRegressionValue(record);
     }
 }

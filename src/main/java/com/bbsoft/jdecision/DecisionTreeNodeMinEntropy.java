@@ -48,7 +48,7 @@ class DecisionTreeNodeMinEntropy extends DecisionTreeNode {
         var entropy = 0.0;
         for (FeatureClass<?> featureClass : classification.keySet()) {
             var entropyOfClass = 0.0;
-            for (FeatureClass<?> targetClass : featureClass.getTargetClasses().keySet()) {
+            for (FeatureClass<?> targetClass : featureClass.getTargetClassification().keySet()) {
                 var p = targetClass.getProbability();
                 entropyOfClass += p * (Math.log(p) / Math.log(2));
             }
