@@ -11,57 +11,60 @@ class DecisionTreeNodeFactory {
 
     private final DecisionMode decisionMode;
 
-    DecisionTreeNode getRootNode(List<Record> records, List<Feature<Object>> features, TargetFeature<Object> targetFeature) {
+    DecisionTreeNode getRootNode(List<Record> records, List<Variable<Object>> variables, TargetVariable<Object> targetVariable) {
         switch (decisionMode) {
             case REGRESSION:
                 return DecisionTreeNodeRegression.builder()
                     .records(records)
-                    .remainingFeatures(new ArrayList<>(features))
-                    .targetFeature(targetFeature)
+                    .remainingVariables(new ArrayList<>(variables))
+                    .targetVariable(targetVariable)
                     .isRegression(true)
                     .build();
             case MANUAL_CLASSIFICATION:
                 return DecisionTreeNodeManual.builder()
                     .records(records)
-                    .remainingFeatures(new ArrayList<>(features))
-                    .targetFeature(targetFeature)
+                    .remainingVariables(new ArrayList<>(variables))
+                    .targetVariable(targetVariable)
                     .isRegression(false)
                     .build();
             default:
                 return DecisionTreeNodeMinEntropy.builder()
                     .records(records)
-                    .remainingFeatures(new ArrayList<>(features))
-                    .targetFeature(targetFeature)
+                    .remainingVariables(new ArrayList<>(variables))
+                    .targetVariable(targetVariable)
                     .isRegression(false)
                     .build();
         }
     }
 
-    DecisionTreeNode getChildNode(List<Record> records, List<Feature<Object>> remainingFeatures, TargetFeature<Object> targetFeature, FeatureClass<?> featureClass) {
+    DecisionTreeNode getChildNode(List<Record> records,
+                                  List<Variable<Object>> remainingVariables,
+                                  TargetVariable<Object> targetVariable,
+                                  VariableClass<?> variableClass) {
         switch (decisionMode) {
             case REGRESSION:
                 return DecisionTreeNodeRegression.builder()
                     .records(records)
-                    .remainingFeatures(new ArrayList<>(remainingFeatures))
-                    .targetFeature(targetFeature)
+                    .remainingVariables(new ArrayList<>(remainingVariables))
+                    .targetVariable(targetVariable)
                     .isRegression(true)
-                    .featureClass(featureClass)
+                    .variableClass(variableClass)
                     .build();
             case MANUAL_CLASSIFICATION:
                 return DecisionTreeNodeManual.builder()
                     .records(records)
-                    .remainingFeatures(remainingFeatures)
-                    .targetFeature(targetFeature)
+                    .remainingVariables(remainingVariables)
+                    .targetVariable(targetVariable)
                     .isRegression(false)
-                    .featureClass(featureClass)
+                    .variableClass(variableClass)
                     .build();
             default:
                 return DecisionTreeNodeMinEntropy.builder()
                     .records(records)
-                    .remainingFeatures(remainingFeatures)
-                    .targetFeature(targetFeature)
+                    .remainingVariables(remainingVariables)
+                    .targetVariable(targetVariable)
                     .isRegression(false)
-                    .featureClass(featureClass)
+                    .variableClass(variableClass)
                     .build();
         }
     }

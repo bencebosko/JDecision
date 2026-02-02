@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 /* A column in the dataset. T is the type of the value (Integer, Double, String etc.) T must implement equals and hashCode */
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Feature<T> {
+public class Variable<T> {
 
     @Getter
     @EqualsAndHashCode.Include

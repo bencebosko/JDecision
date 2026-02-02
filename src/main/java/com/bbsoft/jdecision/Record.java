@@ -7,25 +7,25 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-/* A row of feature-value pairs. If a record has missing feature exception is thrown. */
+/* A row of Variables. If a record has missing Variable exception is thrown. */
 @RequiredArgsConstructor
 @ToString
 public class Record {
 
-    private final Map<Feature<?>, Object> data;
+    private final Map<Variable<?>, Object> data;
 
     public Record() {
         data = new HashMap<>();
     }
 
-    public void setValue(Feature<?> feature, Object value) {
-        data.put(feature, value);
+    public void setValue(Variable<?> variable, Object value) {
+        data.put(variable, value);
     }
 
-    public Object getValue(Feature<?> feature) {
-        var value = data.get(feature);
+    public Object getValue(Variable<?> variable) {
+        var value = data.get(variable);
         if (Objects.isNull(value)) {
-            throw DecisionTreeException.missingFeature(this, feature);
+            throw new DecisionTreeException("Record has missing variable: " + variable.getName() + ". " + this);
         }
         return value;
     }

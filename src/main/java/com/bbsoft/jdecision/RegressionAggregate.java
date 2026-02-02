@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
-/* Stores mean value when aggregating the target variable in regression mode. Uses BigDecimal to avoid double overflow. */
+/* Stores mean value when aggregating the TargetVariable in regression mode. Uses BigDecimal to avoid double overflow. */
 public class RegressionAggregate {
 
     private double valueSum;

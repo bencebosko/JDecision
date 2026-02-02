@@ -8,21 +8,20 @@ import lombok.RequiredArgsConstructor;
 import java.util.HashMap;
 import java.util.Map;
 
-/* Represents a class of a feature's classification. Stores data of the classified records. */
+/* Represents a class of a Variable's classification. Stores important aggregates of the TargetVariable. */
 @RequiredArgsConstructor
-@Getter
+@Getter(AccessLevel.PACKAGE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class FeatureClass<T> {
+public class VariableClass<T> {
 
     @EqualsAndHashCode.Include
-    private final Feature<T> feature;
+    private final Variable<T> variable;
     @EqualsAndHashCode.Include
     private final T exactValue;
     @EqualsAndHashCode.Include
     private final Interval<T> interval;
     private final RegressionAggregate regressionAggregate = new RegressionAggregate();
-    @Getter(AccessLevel.PACKAGE)
-    private final Map<FeatureClass<?>, FeatureClass<?>> targetClassification = new HashMap<>();
+    private final Map<VariableClass<?>, VariableClass<?>> targetClassification = new HashMap<>();
     private int count = 0;
     private double probability = 0.0;
 
@@ -31,7 +30,7 @@ public class FeatureClass<T> {
         regressionAggregate.add(value);
     }
 
-    void addTargetClass(Record record, int totalCount, TargetFeature<Object> targetFeature) {
+    void addTargetClass(Record record, int totalCount, TargetVariable<Object> targetFeature) {
         incrementCount(totalCount);
         var targetClass = targetClassification.computeIfAbsent(targetFeature.getClassifier().classify(record, targetFeature), cls -> cls);
         targetClass.incrementCount(count);

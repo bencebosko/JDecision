@@ -10,10 +10,10 @@ import java.util.Map;
 @Getter(AccessLevel.PACKAGE)
 class ClassificationDTO {
 
-    private final Map<FeatureClass<?>, List<Record>> classification;
+    private final Map<VariableClass<?>, List<Record>> classification;
     private final Double classificationMean;
 
-    ClassificationDTO(Map<FeatureClass<?>, List<Record>> classification, Double classificationMean) {
+    ClassificationDTO(Map<VariableClass<?>, List<Record>> classification, Double classificationMean) {
         this.classification = Collections.unmodifiableMap(classification);
         this.classificationMean = classificationMean;
     }

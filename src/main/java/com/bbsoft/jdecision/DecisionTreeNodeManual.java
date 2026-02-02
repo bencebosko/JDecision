@@ -10,21 +10,21 @@ class DecisionTreeNodeManual extends DecisionTreeNode {
 
     @Builder
     DecisionTreeNodeManual(List<Record> records,
-                           List<Feature<Object>> remainingFeatures,
-                           TargetFeature<Object> targetFeature,
+                           List<Variable<Object>> remainingVariables,
+                           TargetVariable<Object> targetVariable,
                            boolean isRegression,
-                           FeatureClass<?> featureClass) {
-        super(records, remainingFeatures, targetFeature, isRegression, featureClass);
+                           VariableClass<?> variableClass) {
+        super(records, remainingVariables, targetVariable, isRegression, variableClass);
     }
 
-    /* Splits the node with the next feature in manual order. */
+    /* Splits the node with the next Variable in manual order. */
     @Override
-    protected Optional<Map<FeatureClass<?>, List<Record>>> split() {
-        if (remainingFeatures.isEmpty()) {
+    protected Optional<Map<VariableClass<?>, List<Record>>> split() {
+        if (remainingVariables.isEmpty()) {
             return Optional.empty();
         } else {
-            splittingFeature = remainingFeatures.remove(0);
+            splittingVariable = remainingVariables.remove(0);
         }
-        return Optional.of(createClassification(splittingFeature, records).getClassification());
+        return Optional.of(createClassification(splittingVariable, records).getClassification());
     }
 }

@@ -7,21 +7,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-/* Classifies a record by a feature with the given mapping rule. If a Record cannot be obviously classified exception is thrown. */
+/* Classifies a record by a Variable with the given mapping rule. If a Record cannot be classified exception is thrown. */
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 abstract class Classifier<T> {
 
-    private final Map<T, FeatureClass<T>> classes = new HashMap<>();
+    private final Map<T, VariableClass<T>> classes = new HashMap<>();
 
-    protected abstract FeatureClass<T> valueMapper(T value, Feature<T> feature);
+    protected abstract VariableClass<T> valueMapper(T value, Variable<T> variable);
 
     @SuppressWarnings("unchecked")
-    FeatureClass<T> classify(Record record, Feature<T> feature) {
-        final var value = (T) record.getValue(feature);
-        final var featureClass = classes.computeIfAbsent(value, value_ -> valueMapper(value, feature));
-        if (Objects.isNull(featureClass)) {
-            throw DecisionTreeException.classNotFoundForFeature(feature, value);
+    VariableClass<T> classify(Record record, Variable<T> variable) {
+        final var value = (T) record.getValue(variable);
+        final var variableClass = classes.computeIfAbsent(value, value_ -> valueMapper(value, variable));
+        if (Objects.isNull(variableClass)) {
+            throw new DecisionTreeException("Class not found for variable: " + variable.getName() + " with value " + value);
         }
-        return featureClass;
+        return variableClass;
     }
 }

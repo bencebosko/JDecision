@@ -4,7 +4,7 @@ package com.bbsoft.jdecision;
 class ExactValueClassifier<T> extends Classifier<T> {
 
     @Override
-    protected FeatureClass<T> valueMapper(T value, Feature<T> feature) {
-        return new FeatureClass<>(feature, value, null);
+    protected VariableClass<T> valueMapper(T value, Variable<T> variable) {
+        return new VariableClass<>(variable, value, null);
     }
 }

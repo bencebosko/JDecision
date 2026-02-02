@@ -14,46 +14,46 @@ abstract class DecisionTreeNode {
 
     protected final List<Record> records;
     @Getter(AccessLevel.PACKAGE)
-    protected final List<Feature<Object>> remainingFeatures;
-    protected final TargetFeature<Object> targetFeature;
+    protected final List<Variable<Object>> remainingVariables;
+    protected final TargetVariable<Object> targetVariable;
     private final boolean isRegression;
     /* Set after splitting the parent. Null for the root node. */
-    private FeatureClass<?> featureClass;
+    private VariableClass<?> variableClass;
     /* Set after splitting the node. Null for leaf nodes. */
     @Getter(AccessLevel.PACKAGE)
-    protected Feature<Object> splittingFeature;
+    protected Variable<Object> splittingVariable;
     /* Set after splitting the node. Null for leaf nodes. */
     private List<DecisionTreeNode> children;
 
     protected DecisionTreeNode(List<Record> records,
-                               List<Feature<Object>> remainingFeatures,
-                               TargetFeature<Object> targetFeature,
+                               List<Variable<Object>> remainingVariables,
+                               TargetVariable<Object> targetVariable,
                                boolean isRegression,
-                               FeatureClass<?> featureClass) {
+                               VariableClass<?> variableClass) {
         this.records = Collections.unmodifiableList(records);
-        this.remainingFeatures = remainingFeatures;
-        this.targetFeature = targetFeature;
+        this.remainingVariables = remainingVariables;
+        this.targetVariable = targetVariable;
         this.isRegression = isRegression;
-        this.featureClass = featureClass;
+        this.variableClass = variableClass;
     }
 
     /* Returns null for Leaf nodes. */
-    protected abstract Optional<Map<FeatureClass<?>, List<Record>>> split();
+    protected abstract Optional<Map<VariableClass<?>, List<Record>>> split();
 
-    protected ClassificationDTO createClassification(Feature<Object> feature, List<Record> records) {
+    protected ClassificationDTO createClassification(Variable<Object> variable, List<Record> records) {
         final var totalCount = records.size();
-        final Map<FeatureClass<?>, List<Record>> classification = new HashMap<>();
+        final Map<VariableClass<?>, List<Record>> classification = new HashMap<>();
         Double classificationMean = isRegression ? 0.0 : null;
         for (Record record : records) {
-            final FeatureClass<?> featureClass = feature.getClassifier().classify(record, feature);
+            final VariableClass<?> variableClass = variable.getClassifier().classify(record, variable);
             if (isRegression) {
-                final var targetValue = getTargetValue(record, targetFeature);
+                final var targetValue = getTargetValue(record, targetVariable);
                 classificationMean = classificationMean + (targetValue / totalCount);
-                featureClass.addTargetValue(targetValue, totalCount);
+                variableClass.addTargetValue(targetValue, totalCount);
             } else {
-                featureClass.addTargetClass(record, totalCount, targetFeature);
+                variableClass.addTargetClass(record, totalCount, targetVariable);
             }
-            var recordsOfClass = classification.computeIfAbsent(featureClass, key -> new ArrayList<>());
+            var recordsOfClass = classification.computeIfAbsent(variableClass, key -> new ArrayList<>());
             recordsOfClass.add(record);
         }
         return new ClassificationDTO(classification, classificationMean);
@@ -63,11 +63,11 @@ abstract class DecisionTreeNode {
         this.children = Collections.unmodifiableList(children);
     }
 
-    private double getTargetValue(Record record, TargetFeature<?> targetFeature) {
-        var value = record.getValue(targetFeature);
+    private double getTargetValue(Record record, TargetVariable<?> targetVariable) {
+        var value = record.getValue(targetVariable);
         if (value instanceof Double) {
             return (double) value;
         }
-        throw DecisionTreeException.invalidRegressionValue(record);
+        throw new DecisionTreeException("Record has invalid target variable: value must be double in regression mode. " + record);
     }
 }

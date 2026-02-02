@@ -12,32 +12,32 @@ class DecisionTreeNodeRegression extends DecisionTreeNode {
 
     @Builder
     DecisionTreeNodeRegression(List<Record> records,
-                               List<Feature<Object>> remainingFeatures,
-                               TargetFeature<Object> targetFeature,
+                               List<Variable<Object>> remainingVariables,
+                               TargetVariable<Object> targetVariable,
                                boolean isRegression,
-                               FeatureClass<?> featureClass) {
-        super(records, remainingFeatures, targetFeature, isRegression, featureClass);
+                               VariableClass<?> variableClass) {
+        super(records, remainingVariables, targetVariable, isRegression, variableClass);
     }
 
     /* Finds min squared error split at specific node of the tree. */
     @Override
-    protected Optional<Map<FeatureClass<?>, List<Record>>> split() {
-        if (remainingFeatures.isEmpty()) {
+    protected Optional<Map<VariableClass<?>, List<Record>>> split() {
+        if (remainingVariables.isEmpty()) {
             return Optional.empty();
         } else {
-            Map<FeatureClass<?>, List<Record>> optimalClassification = Collections.emptyMap();
+            Map<VariableClass<?>, List<Record>> optimalClassification = Collections.emptyMap();
             var minSquaredError = Double.MAX_VALUE;
-            for (Feature<Object> feature : remainingFeatures) {
-                final var classificationDTO = createClassification(feature, records);
+            for (Variable<Object> variable : remainingVariables) {
+                final var classificationDTO = createClassification(variable, records);
                 final var squaredError = getSquaredError(classificationDTO);
                 if (squaredError < minSquaredError) {
-                    splittingFeature = feature;
+                    splittingVariable = variable;
                     optimalClassification = classificationDTO.getClassification();
                     minSquaredError = squaredError;
                 }
             }
-            if (Objects.nonNull(splittingFeature)) {
-                remainingFeatures.remove(splittingFeature);
+            if (Objects.nonNull(splittingVariable)) {
+                remainingVariables.remove(splittingVariable);
             }
             return Optional.of(optimalClassification);
         }
@@ -46,7 +46,7 @@ class DecisionTreeNodeRegression extends DecisionTreeNode {
     private double getSquaredError(ClassificationDTO classification) {
         final var classificationMean = classification.getClassificationMean();
         var squaredError = 0.0;
-        for (FeatureClass<?> cls : classification.getClassification().keySet()) {
+        for (VariableClass<?> cls : classification.getClassification().keySet()) {
             var error = Math.abs(classificationMean - cls.getRegressionAggregate().getMeanValue());
             squaredError += error * error;
         }
