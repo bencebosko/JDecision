@@ -14,7 +14,12 @@ class DecisionTreeNodeFactory {
     DecisionTreeNode getRootNode(List<Record> records, List<Feature<Object>> features, TargetFeature<Object> targetFeature) {
         switch (decisionMode) {
             case REGRESSION:
-                return null;
+                return DecisionTreeNodeRegression.builder()
+                    .records(records)
+                    .remainingFeatures(new ArrayList<>(features))
+                    .targetFeature(targetFeature)
+                    .isRegression(true)
+                    .build();
             case MANUAL_CLASSIFICATION:
                 return DecisionTreeNodeManual.builder()
                     .records(records)
@@ -35,7 +40,13 @@ class DecisionTreeNodeFactory {
     DecisionTreeNode getChildNode(List<Record> records, List<Feature<Object>> remainingFeatures, TargetFeature<Object> targetFeature, FeatureClass<?> featureClass) {
         switch (decisionMode) {
             case REGRESSION:
-                return null;
+                return DecisionTreeNodeRegression.builder()
+                    .records(records)
+                    .remainingFeatures(new ArrayList<>(remainingFeatures))
+                    .targetFeature(targetFeature)
+                    .isRegression(true)
+                    .featureClass(featureClass)
+                    .build();
             case MANUAL_CLASSIFICATION:
                 return DecisionTreeNodeManual.builder()
                     .records(records)

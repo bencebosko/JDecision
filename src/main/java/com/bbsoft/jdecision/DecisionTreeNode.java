@@ -40,19 +40,34 @@ abstract class DecisionTreeNode {
     /* Returns null for Leaf nodes. */
     protected abstract Optional<Map<FeatureClass<?>, List<Record>>> split();
 
-    protected Map<FeatureClass<?>, List<Record>> createClassification(Feature<Object> feature, List<Record> records) {
+    protected ClassificationDTO createClassification(Feature<Object> feature, List<Record> records) {
+        final var totalCount = records.size();
         final Map<FeatureClass<?>, List<Record>> classification = new HashMap<>();
-        for (int rec = 0; rec < records.size(); rec++) {
-            final Record record = records.get(rec);
+        Double classificationMean = isRegression ? 0.0 : null;
+        for (Record record : records) {
             final FeatureClass<?> featureClass = feature.getClassifier().classify(record, feature);
-            featureClass.addRecord(record, records.size(), targetFeature, isRegression);
+            if (isRegression) {
+                final var targetValue = getTargetValue(record, targetFeature);
+                classificationMean = classificationMean + (targetValue / totalCount);
+                featureClass.addTargetValue(targetValue, totalCount);
+            } else {
+                featureClass.addTargetClass(record, totalCount, targetFeature);
+            }
             var recordsOfClass = classification.computeIfAbsent(featureClass, key -> new ArrayList<>());
             recordsOfClass.add(record);
         }
-        return Collections.unmodifiableMap(classification);
+        return new ClassificationDTO(classification, classificationMean);
     }
 
     void setChildren(List<DecisionTreeNode> children) {
         this.children = Collections.unmodifiableList(children);
+    }
+
+    private double getTargetValue(Record record, TargetFeature<?> targetFeature) {
+        var value = record.getValue(targetFeature);
+        if (value instanceof Double) {
+            return (double) value;
+        }
+        throw DecisionTreeException.invalidRegressionValue(record);
     }
 }

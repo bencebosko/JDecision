@@ -17,7 +17,7 @@ class DecisionTreeNodeManual extends DecisionTreeNode {
         super(records, remainingFeatures, targetFeature, isRegression, featureClass);
     }
 
-    /* Splits records with the given features one by one in sequential order. */
+    /* Splits the node with the next feature in manual order. */
     @Override
     protected Optional<Map<FeatureClass<?>, List<Record>>> split() {
         if (remainingFeatures.isEmpty()) {
@@ -25,6 +25,6 @@ class DecisionTreeNodeManual extends DecisionTreeNode {
         } else {
             splittingFeature = remainingFeatures.remove(0);
         }
-        return Optional.of(createClassification(splittingFeature, records));
+        return Optional.of(createClassification(splittingFeature, records).getClassification());
     }
 }

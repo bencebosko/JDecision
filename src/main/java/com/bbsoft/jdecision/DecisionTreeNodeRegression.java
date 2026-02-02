@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-class DecisionTreeNodeMinEntropy extends DecisionTreeNode {
+class DecisionTreeNodeRegression extends DecisionTreeNode {
 
     @Builder
-    DecisionTreeNodeMinEntropy(List<Record> records,
+    DecisionTreeNodeRegression(List<Record> records,
                                List<Feature<Object>> remainingFeatures,
                                TargetFeature<Object> targetFeature,
                                boolean isRegression,
@@ -19,21 +19,21 @@ class DecisionTreeNodeMinEntropy extends DecisionTreeNode {
         super(records, remainingFeatures, targetFeature, isRegression, featureClass);
     }
 
-    /* Finds min entropy split at specific node of the tree. */
+    /* Finds min squared error split at specific node of the tree. */
     @Override
     protected Optional<Map<FeatureClass<?>, List<Record>>> split() {
         if (remainingFeatures.isEmpty()) {
             return Optional.empty();
         } else {
             Map<FeatureClass<?>, List<Record>> optimalClassification = Collections.emptyMap();
-            var minEntropy = Double.MAX_VALUE;
+            var minSquaredError = Double.MAX_VALUE;
             for (Feature<Object> feature : remainingFeatures) {
                 final var classificationDTO = createClassification(feature, records);
-                final var entropy = getAverageEntropy(classificationDTO.getClassification());
-                if (entropy < minEntropy) {
+                final var squaredError = getSquaredError(classificationDTO);
+                if (squaredError < minSquaredError) {
                     splittingFeature = feature;
                     optimalClassification = classificationDTO.getClassification();
-                    minEntropy = entropy;
+                    minSquaredError = squaredError;
                 }
             }
             if (Objects.nonNull(splittingFeature)) {
@@ -43,17 +43,13 @@ class DecisionTreeNodeMinEntropy extends DecisionTreeNode {
         }
     }
 
-    private double getAverageEntropy(Map<FeatureClass<?>, List<Record>> classification) {
-        final var classCount = classification.size();
-        var entropy = 0.0;
-        for (FeatureClass<?> featureClass : classification.keySet()) {
-            var entropyOfClass = 0.0;
-            for (FeatureClass<?> targetClass : featureClass.getTargetClassification().keySet()) {
-                var p = targetClass.getProbability();
-                entropyOfClass += p * (Math.log(p) / Math.log(2));
-            }
-            entropy += entropyOfClass;
+    private double getSquaredError(ClassificationDTO classification) {
+        final var classificationMean = classification.getClassificationMean();
+        var squaredError = 0.0;
+        for (FeatureClass<?> cls : classification.getClassification().keySet()) {
+            var error = Math.abs(classificationMean - cls.getRegressionAggregate().getMeanValue());
+            squaredError += error * error;
         }
-        return (-1 * entropy) / classCount;
+        return squaredError;
     }
 }

@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.HashMap;
 import java.util.Map;
 
-/* Represents a class of a feature classification. Stores data of the classified records. */
+/* Represents a class of a feature's classification. Stores data of the classified records. */
 @RequiredArgsConstructor
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -26,27 +26,19 @@ public class FeatureClass<T> {
     private int count = 0;
     private double probability = 0.0;
 
-    void addRecord(Record record, int recordCount, TargetFeature<Object> targetFeature, boolean isRegression) {
+    void addTargetValue(double value, int totalCount) {
+        incrementCount(totalCount);
+        regressionAggregate.add(value);
+    }
+
+    void addTargetClass(Record record, int totalCount, TargetFeature<Object> targetFeature) {
+        incrementCount(totalCount);
+        var targetClass = targetClassification.computeIfAbsent(targetFeature.getClassifier().classify(record, targetFeature), cls -> cls);
+        targetClass.incrementCount(count);
+    }
+
+    private void incrementCount(int totalCount) {
         count = count + 1;
-        setProbability(recordCount);
-        if (isRegression) {
-            regressionAggregate.add(getValueForRegression(record, targetFeature));
-        } else {
-            final var targetClass = targetClassification.computeIfAbsent(targetFeature.getClassifier().classify(record, targetFeature), cls -> cls);
-            targetClass.count = targetClass.count + 1;
-            targetClass.setProbability(recordCount);
-        }
-    }
-
-    private void setProbability(int totalCount) {
         probability = (double) count / totalCount;
-    }
-
-    private double getValueForRegression(Record record, TargetFeature<?> targetFeature) {
-        var value = record.getValue(targetFeature);
-        if (value instanceof Double) {
-            return (double) value;
-        }
-        throw DecisionTreeException.invalidRegressionValue(record);
     }
 }
